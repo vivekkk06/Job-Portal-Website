@@ -1,0 +1,18 @@
+from django.urls import path
+from .views import (
+    StartRegisterView,
+    VerifyEmailView,
+    CompleteRegisterView,
+    EmailOrUsernameTokenView,
+    MeView,
+    ResendOTPView,
+)
+
+urlpatterns = [
+    path("start-register/", StartRegisterView.as_view()),
+    path("resend-otp/", ResendOTPView.as_view()),  # ← ADD THIS
+    path("verify-email/", VerifyEmailView.as_view()),
+    path("complete-register/", CompleteRegisterView.as_view()),
+    path("login/", EmailOrUsernameTokenView.as_view()),
+    path("me/", MeView.as_view()),
+]

@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* Global base styles */
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+/* Reusable UI utilities */
+@layer utilities {
+  .btn-primary {
+    @apply bg-blue-600 text-white px-5 py-2 rounded-xl font-semibold hover:bg-blue-700 transition;
+  }
+
+  .btn-outline {
+    @apply border border-gray-300 px-5 py-2 rounded-xl hover:bg-gray-100 transition;
+  }
+
+  .input {
+    @apply border border-gray-300 rounded-xl px-4 py-2 w-full outline-none focus:ring-2 focus:ring-blue-500;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow p-6;
+  }
+}
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
