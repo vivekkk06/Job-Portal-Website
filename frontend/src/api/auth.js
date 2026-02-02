@@ -1,16 +1,13 @@
-import axios from "axios";
+import api from "./axios";
 
-const BASE = "http://127.0.0.1:8000/api";
-
+// Login
 export const login = (data) =>
-  axios.post(`${BASE}/token/`, data);
+  api.post("/token/", data);
 
+// Register
 export const register = (data) =>
-  axios.post(`${BASE}/accounts/register/`, data);
+  api.post("/accounts/register/", data);
 
+// Get current user
 export const me = () =>
-  axios.get(`${BASE}/accounts/me/`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access")}`,
-    },
-  });
+  api.get("/accounts/me/");

@@ -1,13 +1,13 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
+// Attach token automatically (except public routes)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("access");
 
-// ❗ DO NOT attach token for public endpoints
   if (
     token &&
     !config.url.includes("start-register") &&
@@ -17,7 +17,6 @@ api.interceptors.request.use((config) => {
   ) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
 
   return config;
 });
