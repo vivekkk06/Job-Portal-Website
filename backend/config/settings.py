@@ -86,9 +86,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"postgres://{config('DB_USER')}:{config('DB_PASSWORD')}@{config('DB_HOST')}:{config('DB_PORT')}/{config('DB_NAME')}"
+        default=config("DATABASE_URL", default=None),
+        conn_max_age=600,
+        ssl_require=not DEBUG,
     )
 }
+
 
 # ==============================
 # CUSTOM USER MODEL
