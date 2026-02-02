@@ -1,13 +1,21 @@
 import api from "./axios";
 
-// Login
+// LOGIN
 export const login = (data) =>
-  api.post("/token/", data);
+  api.post("/api/accounts/login/", data);
 
-// Register
+// START REGISTER
 export const register = (data) =>
-  api.post("/accounts/register/", data);
+  api.post("/api/accounts/start-register/", data);
 
-// Get current user
+// VERIFY EMAIL (if used)
+export const verifyEmail = (data) =>
+  api.post("/api/accounts/verify-email/", data);
+
+// COMPLETE REGISTER (if used)
+export const completeRegister = (data) =>
+  api.post("/api/accounts/complete-register/", data);
+
+// GET CURRENT USER
 export const me = () =>
-  api.get("/accounts/me/");
+  api.get("/api/accounts/me/");
