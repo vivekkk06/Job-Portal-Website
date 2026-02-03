@@ -1,11 +1,11 @@
 from django.urls import path
 from .views import (
     StartRegisterView,
+    ResendOTPView,
     VerifyEmailView,
     CompleteRegisterView,
     EmailOrUsernameTokenView,
     MeView,
-    ResendOTPView,
 )
 
 urlpatterns = [
