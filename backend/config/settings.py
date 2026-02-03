@@ -119,8 +119,10 @@ SIMPLE_JWT = {
 }
 
 # ==============================
-# CORS CONFIG (PRODUCTION SAFE)
+# CORS
 # ==============================
+
+CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
     "https://job-portal-website-vzmm.onrender.com",
