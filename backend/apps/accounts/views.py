@@ -11,7 +11,81 @@ from .serializers import UserSerializer, EmailOrUsernameTokenSerializer
 
 
 # ======================================================
-# START REGISTER (SEND OTP)
+# EMAIL SENDER FUNCTION (Reusable + Safe)
+# ======================================================
+def send_otp_via_sendgrid(email, otp):
+    if not hasattr(settings, "SENDGRID_API_KEY"):
+        raise Exception("SENDGRID_API_KEY not configured in settings")
+
+    url = "https://api.sendgrid.com/v3/mail/send"
+
+    headers = {
+        "Authorization": f"Bearer {settings.SENDGRID_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    data = {
+        "personalizations": [
+            {
+                "to": [{"email": email}],
+                "subject": "Your JobDhundho Verification Code",
+            }
+        ],
+        "from": {
+            "email": settings.DEFAULT_FROM_EMAIL,
+            "name": "JobDhundho Team"
+        },
+        "reply_to": {
+            "email": settings.DEFAULT_FROM_EMAIL,
+            "name": "JobDhundho Support"
+        },
+        "content": [
+            {
+                "type": "text/plain",
+                "value": f"""
+Hello,
+
+Your JobDhundho verification code is: {otp}
+
+This code will expire in 10 minutes.
+
+If you did not request this email, please ignore it.
+
+Regards,
+JobDhundho Team
+"""
+            },
+            {
+                "type": "text/html",
+                "value": f"""
+<html>
+  <body style="font-family:Arial, sans-serif; padding:20px;">
+    <h2>Welcome to JobDhundho 👋</h2>
+    <p>Your verification code is:</p>
+    <h1 style="color:#2563eb;">{otp}</h1>
+    <p>This code will expire in 10 minutes.</p>
+    <hr>
+    <p style="font-size:12px; color:gray;">
+      If you did not request this email, you can safely ignore it.
+    </p>
+  </body>
+</html>
+"""
+            }
+        ],
+    }
+
+    response = requests.post(url, headers=headers, json=data, timeout=10)
+
+    print("SendGrid status:", response.status_code)
+    print("SendGrid response:", response.text)
+
+    if response.status_code != 202:
+        raise Exception(response.text)
+
+
+# ======================================================
+# START REGISTER
 # ======================================================
 class StartRegisterView(APIView):
     permission_classes = [AllowAny]
@@ -30,10 +104,9 @@ class StartRegisterView(APIView):
         user = User.objects.filter(email=email).first()
 
         if not user:
-            temp_username = f"user_{random.randint(100000, 999999)}"
             user = User.objects.create(
                 email=email,
-                username=temp_username,
+                username=f"user_{random.randint(100000,999999)}",
                 is_active=False,
                 is_verified=False
             )
@@ -42,61 +115,12 @@ class StartRegisterView(APIView):
         user.save()
 
         try:
-            self.send_otp_email(user.email, otp)
+            send_otp_via_sendgrid(user.email, otp)
         except Exception as e:
-            print("SendGrid error:", str(e))
+            print("Email sending failed:", str(e))
             return Response({"error": "Failed to send OTP"}, status=500)
 
         return Response({"message": "OTP sent successfully"})
-
-
-    def send_otp_email(self, email, otp):
-
-        # 🔴 Check if API key exists
-        if not hasattr(settings, "SENDGRID_API_KEY"):
-            raise Exception("SENDGRID_API_KEY not configured in settings")
-
-        url = "https://api.sendgrid.com/v3/mail/send"
-
-        headers = {
-            "Authorization": f"Bearer {settings.SENDGRID_API_KEY}",
-            "Content-Type": "application/json",
-        }
-
-        data = {
-            "personalizations": [
-                {
-                    "to": [{"email": email}],
-                    "subject": "Verify Your Email - JobDhundho",
-                }
-            ],
-            "from": {
-                "email": settings.DEFAULT_FROM_EMAIL
-            },
-            "content": [
-                {
-                    "type": "text/html",
-                    "value": f"""
-                        <div style="font-family: Arial, sans-serif; padding:20px;">
-                            <h2>Welcome to JobDhundho 👋</h2>
-                            <p>Your verification code is:</p>
-                            <h1 style="color:#2563eb;">{otp}</h1>
-                            <p>This code will expire in 10 minutes.</p>
-                            <br>
-                            <p>Thanks,<br>JobDhundho Team</p>
-                        </div>
-                    """
-                }
-            ],
-        }
-
-        response = requests.post(url, headers=headers, json=data)
-
-        print("SendGrid status:", response.status_code)
-        print("SendGrid response:", response.text)
-
-        if response.status_code != 202:
-            raise Exception(response.text)
 
 
 # ======================================================
@@ -121,9 +145,9 @@ class ResendOTPView(APIView):
         user.save()
 
         try:
-            StartRegisterView().send_otp_email(email, otp)
+            send_otp_via_sendgrid(email, otp)
         except Exception as e:
-            print("SendGrid error:", str(e))
+            print("Email resend failed:", str(e))
             return Response({"error": "Failed to resend OTP"}, status=500)
 
         return Response({"message": "OTP resent successfully"})

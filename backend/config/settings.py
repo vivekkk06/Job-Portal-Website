@@ -158,7 +158,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "apikey"
 EMAIL_HOST_PASSWORD = config("SENDGRID_API_KEY")
 SENDGRID_API_KEY = config("SENDGRID_API_KEY")
-DEFAULT_FROM_EMAIL = "kenichi13112006@gmail.com"
+DEFAULT_FROM_EMAIL = "noreply@jobdhundho.com"
+
 
 # ==============================
 # STATIC & MEDIA
