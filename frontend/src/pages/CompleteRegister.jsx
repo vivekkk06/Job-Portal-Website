@@ -16,7 +16,7 @@ export default function CompleteRegister() {
     setError("");
 
     try {
-      await api.post("accounts/complete-register/", {
+      await api.post("/api/accounts/complete-register/", {
         email,
         ...form,
       });
