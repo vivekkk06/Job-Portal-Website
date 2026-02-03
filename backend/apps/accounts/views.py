@@ -64,15 +64,19 @@ class StartRegisterView(APIView):
 
         plain_message = strip_tags(html_message)
 
-        send_mail(
-            subject,
-            plain_message,
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            html_message=html_message,
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            print("Email sent successfully")
 
+        except Exception as e:
+            print("Email sending failed:", e)
 
 # ======================================================
 # RESEND OTP (FIX FOR YOUR 404 ERROR)
