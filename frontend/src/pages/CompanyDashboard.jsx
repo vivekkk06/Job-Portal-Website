@@ -71,7 +71,7 @@ export default function CompanyDashboard() {
     if (!confirmDelete) return;
 
     try {
-      await api.delete(`jobs/${jobId}/delete/`);
+      await api.delete(`/api/jobs/${jobId}/delete/`);
 
       // Remove job + related applications instantly
       setApplications((prev) =>

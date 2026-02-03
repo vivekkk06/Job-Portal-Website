@@ -26,7 +26,7 @@ export default function Home() {
 
   async function fetchJobs() {
     try {
-      const res = await api.get("jobs/");
+      const res = await api.get("/api/jobs/");
       const jobs = res.data;
 
       if (jobs.length <= 3) {

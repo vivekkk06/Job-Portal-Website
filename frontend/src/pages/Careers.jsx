@@ -20,7 +20,8 @@ export default function Careers() {
 
   async function fetchJobs() {
     try {
-      const res = await api.get("jobs/");
+      const res = await api.get("/api/jobs/");
+
       setJobs(res.data);
     } catch (err) {
       console.log("Error fetching jobs:", err.response?.data);

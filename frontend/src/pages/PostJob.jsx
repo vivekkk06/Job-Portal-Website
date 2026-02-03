@@ -45,7 +45,7 @@ export default function PostJob() {
     setError("");
 
     try {
-      await api.post("jobs/", form);
+      await api.post("/api/jobs/", form);
       alert("Job posted successfully 🚀");
       navigate("/jobs");
     } catch (err) {
