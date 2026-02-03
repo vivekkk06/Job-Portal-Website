@@ -38,7 +38,7 @@ export default function ApplyJob() {
       data.append("phone", form.phone);
       data.append("resume", form.resume);
 
-      await api.post("applications/apply/", data, {
+      await api.post("/api/applications/apply/", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
