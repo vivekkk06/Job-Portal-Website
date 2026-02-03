@@ -133,6 +133,16 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # ==============================
+# SENDGRID CONFIG
+# ==============================
+
+from decouple import config
+
+SENDGRID_API_KEY = config("SENDGRID_API_KEY")
+
+DEFAULT_FROM_EMAIL = "kenichi13112006@gmail.com"
+
+# ==============================
 # EMAIL CONFIG
 # ==============================
 
