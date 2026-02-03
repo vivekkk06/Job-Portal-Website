@@ -2,11 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django.core.mail import send_mail
 from django.conf import settings
-from django.utils.html import strip_tags
-from django.template.loader import render_to_string
 import random
+import requests
 
 from .models import User
 from .serializers import UserSerializer, EmailOrUsernameTokenSerializer
@@ -47,35 +45,49 @@ class StartRegisterView(APIView):
 
         return Response({"message": "OTP sent successfully"})
 
-
     def send_otp_email(self, email, otp):
-        subject = "Verify Your Email - JobDhundho"
+        url = "https://api.sendgrid.com/v3/mail/send"
 
-        html_message = f"""
-        <div style="font-family: Arial, sans-serif; padding:20px;">
-            <h2>Welcome to JobDhundho 👋</h2>
-            <p>Your verification code is:</p>
-            <h1 style="color:#2563eb;">{otp}</h1>
-            <p>This code will expire in 10 minutes.</p>
-            <br>
-            <p>Thanks,<br>JobDhundho Team</p>
-        </div>
-        """
+        headers = {
+            "Authorization": f"Bearer {settings.SENDGRID_API_KEY}",
+            "Content-Type": "application/json",
+        }
 
-        plain_message = strip_tags(html_message)
+        data = {
+            "personalizations": [
+                {
+                    "to": [{"email": email}],
+                    "subject": "Verify Your Email - JobDhundho",
+                }
+            ],
+            "from": {
+                "email": settings.DEFAULT_FROM_EMAIL
+            },
+            "content": [
+                {
+                    "type": "text/html",
+                    "value": f"""
+                        <div style="font-family: Arial, sans-serif; padding:20px;">
+                            <h2>Welcome to JobDhundho 👋</h2>
+                            <p>Your verification code is:</p>
+                            <h1 style="color:#2563eb;">{otp}</h1>
+                            <p>This code will expire in 10 minutes.</p>
+                            <br>
+                            <p>Thanks,<br>JobDhundho Team</p>
+                        </div>
+                    """
+                }
+            ],
+        }
 
-        send_mail(
-            subject,
-            plain_message,
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            html_message=html_message,
-            fail_silently=False,
-        )
+        response = requests.post(url, headers=headers, json=data)
+
+        if response.status_code != 202:
+            raise Exception(f"SendGrid Error: {response.text}")
 
 
 # ======================================================
-# RESEND OTP (FIX FOR YOUR 404 ERROR)
+# RESEND OTP
 # ======================================================
 class ResendOTPView(APIView):
     permission_classes = [AllowAny]
@@ -160,7 +172,7 @@ class CompleteRegisterView(APIView):
 
 
 # ======================================================
-# LOGIN (EMAIL OR USERNAME)
+# LOGIN
 # ======================================================
 class EmailOrUsernameTokenView(TokenObtainPairView):
     serializer_class = EmailOrUsernameTokenSerializer
