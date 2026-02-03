@@ -25,7 +25,7 @@ export default function PostJob() {
 
   async function checkCompany() {
     try {
-      const res = await api.get("companies/my-company/");
+      const res = await api.get("/api/companies/my-company/");
       if (!res.data.exists) {
         navigate("/create-company");
       }

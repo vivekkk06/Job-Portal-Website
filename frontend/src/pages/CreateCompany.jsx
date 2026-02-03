@@ -25,7 +25,7 @@ export default function CreateCompany() {
     setError("");
 
     try {
-      await api.post("companies/create/", form);
+      await api.post("/api/companies/create/", form);
 
       alert("Company profile created successfully 🚀");
       navigate("/post-job");

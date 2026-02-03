@@ -18,7 +18,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      await api.post("accounts/forgot-password/", { email });
+      await api.post("/api/accounts/forgot-password/", { email });
       setSuccess("OTP sent to your email 📩");
       setTimeout(() => navigate("/reset-password", { state: { email } }), 1500);
     } catch {

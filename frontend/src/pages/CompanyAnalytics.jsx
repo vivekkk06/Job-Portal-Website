@@ -12,7 +12,7 @@ export default function CompanyAnalytics() {
 
   async function fetchAnalytics() {
     try {
-      const res = await api.get("applications/analytics/");
+      const res = await api.get("/api/applications/analytics/");
       setData(res.data);
     } catch (err) {
       console.log("Analytics error:", err.response?.data);

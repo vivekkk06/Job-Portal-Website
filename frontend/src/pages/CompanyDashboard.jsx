@@ -18,7 +18,7 @@ export default function CompanyDashboard() {
 
   async function fetchApplications() {
     try {
-      const res = await api.get("applications/company/");
+      const res = await api.get("/api/applications/company/");
       setApplications(res.data);
     } catch (err) {
       console.log("Error fetching applications:", err.response?.data);
