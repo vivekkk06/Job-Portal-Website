@@ -9,14 +9,13 @@ export default function Jobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 Fetch jobs from backend
   useEffect(() => {
     fetchJobs();
   }, []);
 
   async function fetchJobs() {
     try {
-      const res = await api.get("jobs/");
+      const res = await api.get("/api/jobs/");
       setJobs(res.data);
     } catch (err) {
       console.log("Error fetching jobs", err);
@@ -25,12 +24,10 @@ export default function Jobs() {
     }
   }
 
-  // ✅ Read query params
   const params = new URLSearchParams(location.search);
   const search = params.get("search");
   const company = params.get("company");
 
-  // ✅ Apply filters
   const filteredJobs = jobs.filter((job) => {
     let ok = true;
 
@@ -52,38 +49,19 @@ export default function Jobs() {
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-4 gap-8">
-
-        {/* FILTER SIDEBAR */}
         <aside className="bg-white p-6 rounded-2xl shadow h-fit">
           <h2 className="font-bold text-lg mb-4">Filters</h2>
-
-          {search && (
-            <p className="text-sm mb-2">
-              🔍 Search: <b>{search}</b>
-            </p>
-          )}
-
-          {company && (
-            <p className="text-sm mb-2">
-              🏢 Company: <b>{company}</b>
-            </p>
-          )}
-
-          {!search && !company && (
-            <p className="text-sm text-gray-500">
-              Use search or company to filter jobs.
-            </p>
-          )}
+          {search && <p className="text-sm mb-2">🔍 Search: <b>{search}</b></p>}
+          {company && <p className="text-sm mb-2">🏢 Company: <b>{company}</b></p>}
         </aside>
 
-        {/* JOB LIST */}
         <section className="md:col-span-3">
           {loading ? (
-            <div className="bg-white p-10 rounded-2xl shadow text-center text-gray-600">
+            <div className="bg-white p-10 rounded-2xl shadow text-center">
               Loading jobs...
             </div>
           ) : filteredJobs.length === 0 ? (
-            <div className="bg-white p-10 rounded-2xl shadow text-center text-gray-600">
+            <div className="bg-white p-10 rounded-2xl shadow text-center">
               No jobs found.
             </div>
           ) : (
@@ -94,7 +72,6 @@ export default function Jobs() {
             </div>
           )}
         </section>
-
       </div>
     </MainLayout>
   );

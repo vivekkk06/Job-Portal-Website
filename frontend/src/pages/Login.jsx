@@ -16,13 +16,12 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await api.post("accounts/login/", form);
+      const res = await api.post("/api/accounts/login/", form);
 
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
 
-      // 🔥 VERY IMPORTANT
-      await loadUser();  // Load user after login
+      await loadUser();
 
       navigate("/");
     } catch {
@@ -34,7 +33,6 @@ export default function Login() {
     <MainLayout>
       <div className="flex items-center justify-center min-h-[85vh] px-4">
         <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-xl">
-
           <h1 className="text-3xl font-bold text-center mb-6">
             Login
           </h1>
@@ -68,7 +66,6 @@ export default function Login() {
               Register
             </Link>
           </p>
-
         </div>
       </div>
     </MainLayout>

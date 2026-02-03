@@ -13,7 +13,7 @@ export default function StartRegister() {
     setError("");
 
     try {
-      await api.post("accounts/start-register/", { email });
+      await api.post("/api/accounts/start-register/", { email });
 
       navigate("/verify-email", { state: { email } });
     } catch (err) {
