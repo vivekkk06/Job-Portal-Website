@@ -137,20 +137,21 @@ CORS_ALLOW_CREDENTIALS = True
 # ==============================
 
 # ==============================
-# EMAIL CONFIG (REAL GMAIL)
+# EMAIL CONFIG (SENDGRID)
 # ==============================
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
 
-EMAIL_HOST_USER = config("apikey")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+# IMPORTANT:
+EMAIL_HOST_USER = "apikey"  # This is literal string, not config()
 
-DEFAULT_FROM_EMAIL = f"JobDhundho <{EMAIL_HOST_USER}>"
+EMAIL_HOST_PASSWORD = config("SENDGRID_API_KEY")
+
+DEFAULT_FROM_EMAIL = "JobDhundho <vivek303323@gmail.com>"
 
 # ==============================
 # STATIC & MEDIA
