@@ -10,7 +10,7 @@ from .views import (
 
 urlpatterns = [
     path("start-register/", StartRegisterView.as_view()),
-    path("resend-otp/", ResendOTPView.as_view()),  # ← ADD THIS
+    path("resend-otp/", ResendOTPView.as_view()),
     path("verify-email/", VerifyEmailView.as_view()),
     path("complete-register/", CompleteRegisterView.as_view()),
     path("login/", EmailOrUsernameTokenView.as_view()),

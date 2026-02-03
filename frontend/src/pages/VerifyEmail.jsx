@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import api from "../api/axios";
 import MainLayout from "../layouts/MainLayout";
+import { resendOTP, verifyEmail } from "../api/auth";
 
 export default function VerifyEmail() {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export default function VerifyEmail() {
     setSuccess("");
 
     try {
-      await api.post("accounts/verify-email/", { email, otp });
+      await verifyEmail({ email, otp });
 
       setSuccess("Email verified successfully 🎉");
 
@@ -26,16 +26,19 @@ export default function VerifyEmail() {
         navigate("/complete-register", { state: { email } });
       }, 1500);
 
-    } catch {
+    } catch (err) {
       setError("Invalid OTP");
     }
   };
 
-  const resendOTP = async () => {
+  const handleResend = async () => {
+    setError("");
+    setSuccess("");
+
     try {
-      await api.post("accounts/resend-otp/", { email });
+      await resendOTP({ email });
       setSuccess("New OTP sent 📩");
-    } catch {
+    } catch (err) {
       setError("Failed to resend OTP");
     }
   };
@@ -67,7 +70,7 @@ export default function VerifyEmail() {
 
           <p className="mt-4 text-sm">
             Didn’t receive code?{" "}
-            <button onClick={resendOTP} className="text-blue-600">
+            <button onClick={handleResend} className="text-blue-600">
               Resend OTP
             </button>
           </p>

@@ -8,6 +8,9 @@ export const login = (data) =>
 export const register = (data) =>
   api.post("/api/accounts/start-register/", data);
 
+// RESEND OTP  🔥 ADD THIS
+export const resendOTP = (data) =>
+  api.post("/api/accounts/resend-otp/", data);
 // VERIFY EMAIL (if used)
 export const verifyEmail = (data) =>
   api.post("/api/accounts/verify-email/", data);
