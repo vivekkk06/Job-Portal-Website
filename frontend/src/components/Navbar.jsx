@@ -20,7 +20,7 @@ export default function Navbar() {
   async function checkCompany() {
     try {
       setLoadingCompany(true);
-      const res = await api.get("companies/my-company/");
+      const res = await api.get("/api/companies/my-company/");
       setHasCompany(res.data.exists);
     } catch (err) {
       console.log("Company check error:", err.response?.data);
