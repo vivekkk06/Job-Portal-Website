@@ -1,12 +1,13 @@
 import axios from "axios";
 
-console.log("API URL:", import.meta.env.VITE_API_URL);
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
+console.log("FINAL API BASE:", API_BASE);
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_BASE,
 });
 
-// Attach token automatically (except public routes)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("access");
 
