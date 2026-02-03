@@ -151,7 +151,8 @@ EMAIL_HOST_USER = "apikey"  # This is literal string, not config()
 
 EMAIL_HOST_PASSWORD = config("SENDGRID_API_KEY")
 
-DEFAULT_FROM_EMAIL = "JobDhundho <vivek303323@gmail.com>"
+DEFAULT_FROM_EMAIL = "JobDhundho <kenichi13112006@gmail.com>"
+
 
 # ==============================
 # STATIC & MEDIA
