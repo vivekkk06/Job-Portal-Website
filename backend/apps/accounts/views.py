@@ -30,7 +30,7 @@ class StartRegisterView(APIView):
         user = User.objects.filter(email=email).first()
 
         if not user:
-            temp_username = f"user_{random.randint(100000,999999)}"
+            temp_username = f"user_{random.randint(100000, 999999)}"
             user = User.objects.create(
                 email=email,
                 username=temp_username,
@@ -41,7 +41,6 @@ class StartRegisterView(APIView):
         user.otp = otp
         user.save()
 
-        # Try sending email but DO NOT crash server
         try:
             self.send_otp_email(user.email, otp)
         except Exception as e:
@@ -50,7 +49,13 @@ class StartRegisterView(APIView):
 
         return Response({"message": "OTP sent successfully"})
 
+
     def send_otp_email(self, email, otp):
+
+        # 🔴 Check if API key exists
+        if not hasattr(settings, "SENDGRID_API_KEY"):
+            raise Exception("SENDGRID_API_KEY not configured in settings")
+
         url = "https://api.sendgrid.com/v3/mail/send"
 
         headers = {
@@ -86,6 +91,9 @@ class StartRegisterView(APIView):
         }
 
         response = requests.post(url, headers=headers, json=data)
+
+        print("SendGrid status:", response.status_code)
+        print("SendGrid response:", response.text)
 
         if response.status_code != 202:
             raise Exception(response.text)
