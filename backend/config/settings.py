@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    "corsheaders",  # MUST be before other apps
+    "corsheaders",
 
     "rest_framework",
     "rest_framework_simplejwt",
@@ -46,9 +46,11 @@ INSTALLED_APPS = [
 # ==============================
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # MUST be first
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+
+    # CORS MUST be before CommonMiddleware
+    "corsheaders.middleware.CorsMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -119,7 +121,7 @@ SIMPLE_JWT = {
 }
 
 # ==============================
-# CORS
+# CORS SETTINGS (PRODUCTION)
 # ==============================
 
 CORS_ALLOW_ALL_ORIGINS = False
