@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_URL || "";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 console.log("FINAL API BASE:", API_BASE);
 
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: API_BASE + "/api/",
 });
 
 api.interceptors.request.use((config) => {
