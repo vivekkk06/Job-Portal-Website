@@ -41,7 +41,12 @@ class StartRegisterView(APIView):
         user.otp = otp
         user.save()
 
-        self.send_otp_email(user.email, otp)
+        # Try sending email but DO NOT crash server
+        try:
+            self.send_otp_email(user.email, otp)
+        except Exception as e:
+            print("SendGrid error:", str(e))
+            return Response({"error": "Failed to send OTP"}, status=500)
 
         return Response({"message": "OTP sent successfully"})
 
@@ -83,7 +88,7 @@ class StartRegisterView(APIView):
         response = requests.post(url, headers=headers, json=data)
 
         if response.status_code != 202:
-            raise Exception(f"SendGrid Error: {response.text}")
+            raise Exception(response.text)
 
 
 # ======================================================
@@ -107,7 +112,11 @@ class ResendOTPView(APIView):
         user.otp = otp
         user.save()
 
-        StartRegisterView().send_otp_email(email, otp)
+        try:
+            StartRegisterView().send_otp_email(email, otp)
+        except Exception as e:
+            print("SendGrid error:", str(e))
+            return Response({"error": "Failed to resend OTP"}, status=500)
 
         return Response({"message": "OTP resent successfully"})
 
