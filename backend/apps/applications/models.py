@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from apps.jobs.models import Job
 
+
 User = settings.AUTH_USER_MODEL
 
 
@@ -13,14 +14,28 @@ class Application(models.Model):
         ("Rejected", "Rejected"),
     ]
 
-    job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    applicant = models.ForeignKey(User, on_delete=models.CASCADE)
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,
+        related_name="applications"
+    )
+
+    applicant = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="applications"
+    )
 
     full_name = models.CharField(max_length=200)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
 
-    resume = models.FileField(upload_to="resumes/")
+    # ✅ This will now upload to Cloudinary automatically
+    resume = models.FileField(
+        upload_to="resumes/",
+        null=True,
+        blank=True
+    )
 
     status = models.CharField(
         max_length=20,
