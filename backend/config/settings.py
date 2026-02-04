@@ -36,6 +36,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
 
+    # Cloudinary
+    "cloudinary",
+    "cloudinary_storage",
+
     "apps.accounts",
     "apps.companies",
     "apps.jobs",
@@ -61,27 +65,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
-
-# ==============================
-# TEMPLATES
-# ==============================
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
-
 WSGI_APPLICATION = "config.wsgi.application"
 
 # ==============================
@@ -121,7 +104,7 @@ SIMPLE_JWT = {
 }
 
 # ==============================
-# CORS SETTINGS
+# CORS
 # ==============================
 
 CORS_ALLOW_ALL_ORIGINS = False
@@ -133,11 +116,10 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # ==============================
-# SENDGRID CONFIG
+# SENDGRID EMAIL
 # ==============================
 
 SENDGRID_API_KEY = config("SENDGRID_API_KEY")
-DEFAULT_FROM_EMAIL = "kenichi13112006@gmail.com"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.sendgrid.net"
@@ -145,6 +127,22 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "apikey"
 EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+
+DEFAULT_FROM_EMAIL = "kenichi13112006@gmail.com"
+
+# ==============================
+# CLOUDINARY CONFIG (IMPORTANT)
+# ==============================
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name=config("CLOUDINARY_CLOUD_NAME"),
+    api_key=config("CLOUDINARY_API_KEY"),
+    api_secret=config("CLOUDINARY_API_SECRET"),
+)
+
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 # ==============================
 # STATIC FILES
@@ -154,14 +152,3 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-# ==============================
-# MEDIA FILES (VERY IMPORTANT)
-# ==============================
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-# Allow Render to serve media in production
-if not DEBUG:
-    MEDIA_URL = "/media/"
