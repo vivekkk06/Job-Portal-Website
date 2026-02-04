@@ -5,14 +5,15 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+
 from .models import Application
 from .serializers import ApplicationSerializer
 from apps.jobs.models import Job
 
 
-# ================================
+# ============================================
 # APPLY FOR JOB
-# ================================
+# ============================================
 class ApplyJobView(generics.CreateAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -26,9 +27,14 @@ class ApplyJobView(generics.CreateAPIView):
         try:
             job = Job.objects.get(id=job_id)
         except Job.DoesNotExist:
-            return Response({"job": "Job does not exist"}, status=400)
+            return Response({"error": "Job does not exist"}, status=400)
 
-        serializer = self.get_serializer(data=request.data)
+        # 🔥 PASS REQUEST CONTEXT (IMPORTANT FOR resume_url)
+        serializer = self.get_serializer(
+            data=request.data,
+            context={"request": request}
+        )
+
         serializer.is_valid(raise_exception=True)
 
         serializer.save(
@@ -39,9 +45,9 @@ class ApplyJobView(generics.CreateAPIView):
         return Response(serializer.data, status=201)
 
 
-# ================================
+# ============================================
 # COMPANY APPLICATION LIST
-# ================================
+# ============================================
 class CompanyApplicationsView(generics.ListAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -51,16 +57,19 @@ class CompanyApplicationsView(generics.ListAPIView):
             job__company__created_by=self.request.user
         ).order_by("-applied_at")
 
+    # 🔥 VERY IMPORTANT FOR resume_url
+    def get_serializer_context(self):
+        return {"request": self.request}
 
-# ================================
+
+# ============================================
 # UPDATE STATUS (ACCEPT / REJECT)
-# ================================
+# ============================================
 class UpdateApplicationStatusView(generics.UpdateAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Only allow company owner to update
         return Application.objects.filter(
             job__company__created_by=self.request.user
         )
@@ -75,7 +84,9 @@ class UpdateApplicationStatusView(generics.UpdateAPIView):
         application.status = status_value
         application.save()
 
-        # 🔥 SEND PROFESSIONAL EMAIL
+        # ==========================
+        # SEND EMAIL
+        # ==========================
         subject = f"Application {status_value} - {application.job.title}"
 
         if status_value == "Accepted":
@@ -109,24 +120,27 @@ Best regards,
 Hiring Team
 """
 
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[application.email],
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[application.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print("Email sending failed:", str(e))
 
         return Response({"message": f"Application {status_value} successfully"})
 
 
-
-
+# ============================================
+# COMPANY ANALYTICS
+# ============================================
 class CompanyAnalyticsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Jobs created by this company user
         jobs = Job.objects.filter(created_by=request.user)
 
         total_jobs = jobs.count()
