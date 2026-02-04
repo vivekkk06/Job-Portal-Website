@@ -51,7 +51,7 @@ export default function CompanyDashboard() {
 
   async function updateStatus(id, status) {
     try {
-      await api.patch(`applications/${id}/update/`, { status });
+      await api.patch(`/api/applications/${id}/update/`, { status });
 
       setApplications((prev) =>
         prev.map((app) =>
@@ -73,19 +73,19 @@ export default function CompanyDashboard() {
     try {
       await api.delete(`/api/jobs/${jobId}/delete/`);
 
-      // Remove job + related applications instantly
       setApplications((prev) =>
-        prev.filter((app) => app.job !== jobId)
+        prev.filter((app) => app.job !== Number(jobId))
       );
     } catch (err) {
       console.log("Delete job error:", err.response?.data);
     }
   }
 
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
+
   return (
     <MainLayout>
       <div className="max-w-6xl mx-auto p-10">
-
         <h1 className="text-3xl font-bold mb-6">
           Company Applications
         </h1>
@@ -125,7 +125,6 @@ export default function CompanyDashboard() {
             key={jobId}
             className="mb-10 bg-gray-50 rounded-2xl p-6 shadow"
           >
-
             {/* JOB HEADER */}
             <div className="flex justify-between items-center mb-6 border-b pb-4">
               <h2 className="text-2xl font-bold">
@@ -147,7 +146,6 @@ export default function CompanyDashboard() {
                 className="bg-white rounded-xl shadow p-5 mb-4"
               >
                 <div className="flex justify-between items-start">
-
                   <div>
                     <h3 className="text-lg font-semibold">
                       {app.full_name}
@@ -156,31 +154,26 @@ export default function CompanyDashboard() {
                     <p className="text-gray-600">📞 {app.phone}</p>
                   </div>
 
-                  {/* STATUS */}
                   <div>
-                    {app.status === "Pending" && (
-                      <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
-                        Pending
-                      </span>
-                    )}
-                    {app.status === "Accepted" && (
-                      <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                        Accepted
-                      </span>
-                    )}
-                    {app.status === "Rejected" && (
-                      <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
-                        Rejected
-                      </span>
-                    )}
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        app.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : app.status === "Accepted"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {app.status}
+                    </span>
                   </div>
                 </div>
 
                 {/* RESUME */}
                 <div className="mt-3">
-                  {app.resume_url ? (
+                  {app.resume ? (
                     <a
-                      href={app.resume_url}
+                      href={`${BACKEND_URL}${app.resume}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-600 font-medium hover:underline"
