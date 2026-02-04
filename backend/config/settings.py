@@ -2,6 +2,7 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 import dj_database_url
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -49,7 +50,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 
-    # CORS MUST be before CommonMiddleware
     "corsheaders.middleware.CorsMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -121,7 +121,7 @@ SIMPLE_JWT = {
 }
 
 # ==============================
-# CORS SETTINGS (PRODUCTION)
+# CORS SETTINGS
 # ==============================
 
 CORS_ALLOW_ALL_ORIGINS = False
@@ -136,41 +136,32 @@ CORS_ALLOW_CREDENTIALS = True
 # SENDGRID CONFIG
 # ==============================
 
-from decouple import config
-
 SENDGRID_API_KEY = config("SENDGRID_API_KEY")
-
 DEFAULT_FROM_EMAIL = "kenichi13112006@gmail.com"
 
-# ==============================
-# EMAIL CONFIG
-# ==============================
-
-# ==============================
-# EMAIL CONFIG (SENDGRID)
-# ==============================
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
 EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
 EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = config("SENDGRID_API_KEY")
-SENDGRID_API_KEY = config("SENDGRID_API_KEY")
-DEFAULT_FROM_EMAIL = "kenichi13112006@gmail.com"
-
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 
 # ==============================
-# STATIC & MEDIA
+# STATIC FILES
 # ==============================
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# ==============================
+# MEDIA FILES (VERY IMPORTANT)
+# ==============================
+
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Allow Render to serve media in production
 if not DEBUG:
     MEDIA_URL = "/media/"
