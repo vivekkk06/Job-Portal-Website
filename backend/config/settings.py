@@ -3,6 +3,7 @@ from datetime import timedelta
 from decouple import config
 import dj_database_url
 import os
+import cloudinary
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,7 +12,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ==============================
 
 SECRET_KEY = config("SECRET_KEY")
-
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config(
@@ -66,6 +66,26 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
+
+# ==============================
+# TEMPLATES (🔥 VERY IMPORTANT)
+# ==============================
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
 
 # ==============================
 # DATABASE
@@ -131,10 +151,8 @@ EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 DEFAULT_FROM_EMAIL = "kenichi13112006@gmail.com"
 
 # ==============================
-# CLOUDINARY CONFIG (IMPORTANT)
+# CLOUDINARY CONFIG
 # ==============================
-
-import cloudinary
 
 cloudinary.config(
     cloud_name=config("CLOUDINARY_CLOUD_NAME"),
@@ -150,5 +168,4 @@ DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

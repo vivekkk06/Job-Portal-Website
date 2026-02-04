@@ -81,8 +81,6 @@ export default function CompanyDashboard() {
     }
   }
 
-  const BACKEND_URL = import.meta.env.VITE_API_URL;
-
   return (
     <MainLayout>
       <div className="max-w-6xl mx-auto p-10">
@@ -154,28 +152,26 @@ export default function CompanyDashboard() {
                     <p className="text-gray-600">📞 {app.phone}</p>
                   </div>
 
-                  <div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        app.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : app.status === "Accepted"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {app.status}
-                    </span>
-                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      app.status === "Pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : app.status === "Accepted"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {app.status}
+                  </span>
                 </div>
 
-                {/* RESUME */}
+                {/* ✅ CORRECT RESUME LINK */}
                 <div className="mt-3">
-                  {app.resume ? (
+                  {app.resume_url ? (
                     <a
-                      href={`${BACKEND_URL}${app.resume}`}
+                      href={app.resume_url}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="text-blue-600 font-medium hover:underline"
                     >
                       View Resume
