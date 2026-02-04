@@ -3,9 +3,9 @@ from datetime import timedelta
 from decouple import config
 import dj_database_url
 import os
-import cloudinary
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # ==============================
 # SECURITY
@@ -18,6 +18,7 @@ ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
     default="127.0.0.1,localhost"
 ).split(",")
+
 
 # ==============================
 # APPLICATIONS
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     "apps.applications",
 ]
 
+
 # ==============================
 # MIDDLEWARE
 # ==============================
@@ -64,17 +66,19 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
 
+
 # ==============================
-# TEMPLATES (🔥 VERY IMPORTANT)
+# TEMPLATES (ADMIN FIX)
 # ==============================
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -86,6 +90,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 # ==============================
 # DATABASE
@@ -99,11 +104,13 @@ DATABASES = {
     )
 }
 
+
 # ==============================
 # CUSTOM USER MODEL
 # ==============================
 
 AUTH_USER_MODEL = "accounts.User"
+
 
 # ==============================
 # REST FRAMEWORK
@@ -123,6 +130,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
+
 # ==============================
 # CORS
 # ==============================
@@ -135,32 +143,33 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+
 # ==============================
 # SENDGRID EMAIL
 # ==============================
-
-SENDGRID_API_KEY = config("SENDGRID_API_KEY")
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.sendgrid.net"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_HOST_PASSWORD = config("SENDGRID_API_KEY")
 
 DEFAULT_FROM_EMAIL = "kenichi13112006@gmail.com"
 
+
 # ==============================
-# CLOUDINARY CONFIG
+# CLOUDINARY (🔥 CORRECT WAY)
 # ==============================
 
-cloudinary.config(
-    cloud_name=config("CLOUDINARY_CLOUD_NAME"),
-    api_key=config("CLOUDINARY_API_KEY"),
-    api_secret=config("CLOUDINARY_API_SECRET"),
-)
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": config("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": config("CLOUDINARY_API_KEY"),
+    "API_SECRET": config("CLOUDINARY_API_SECRET"),
+}
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
 
 # ==============================
 # STATIC FILES
@@ -168,4 +177,5 @@ DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
