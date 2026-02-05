@@ -126,7 +126,7 @@ Hiring Team
                 message=message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[application.email],
-                fail_silently=False,
+                fail_silently=True,
             )
         except Exception as e:
             print("Email sending failed:", str(e))
