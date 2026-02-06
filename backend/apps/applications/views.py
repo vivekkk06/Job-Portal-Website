@@ -11,9 +11,8 @@ from apps.jobs.models import Job
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-
 # ============================================
-# APPLY FOR JOB
+# APPLY FOR JOB (MULTIPLE APPLICATIONS ALLOWED)
 # ============================================
 class ApplyJobView(generics.CreateAPIView):
     serializer_class = ApplicationSerializer
@@ -30,23 +29,18 @@ class ApplyJobView(generics.CreateAPIView):
 
         job = get_object_or_404(Job, id=job_id)
 
-        # ✅ Prevent duplicate application
-        if Application.objects.filter(
-            job=job,
-            applicant=request.user
-        ).exists():
-            return Response(
-                {"message": "You have already applied to this job."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         serializer = self.get_serializer(
             data=request.data,
             context={"request": request}
         )
 
         serializer.is_valid(raise_exception=True)
-        serializer.save(applicant=request.user, job=job)
+
+        # ✅ NOW ALLOWS MULTIPLE APPLICATIONS
+        serializer.save(
+            applicant=request.user,
+            job=job
+        )
 
         return Response(
             {
@@ -55,7 +49,6 @@ class ApplyJobView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED
         )
-
 
 # ============================================
 # COMPANY APPLICATION LIST
