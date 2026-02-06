@@ -60,7 +60,8 @@ class ApplyJobView(generics.CreateAPIView):
 # ============================================
 class CompanyApplicationsView(generics.ListAPIView):
     serializer_class = ApplicationSerializer
-    permission_classes = [IsCompany]  # ✅ only companies
+    permission_classes = [permissions.IsAuthenticated]
+
 
     def get_queryset(self):
         return Application.objects.filter(
@@ -152,14 +153,16 @@ Hiring Team
 # COMPANY ANALYTICS (ONLY COMPANY)
 # ============================================
 class CompanyAnalyticsView(APIView):
-    permission_classes = [IsCompany]  # ✅ only companies
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        jobs = Job.objects.filter(created_by=request.user)
+        # Get jobs through company
+        jobs = Job.objects.filter(company__created_by=request.user)
+
         total_jobs = jobs.count()
 
         applications = Application.objects.filter(
-            job__created_by=request.user
+            job__company__created_by=request.user
         )
 
         total_applications = applications.count()
