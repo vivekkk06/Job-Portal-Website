@@ -1,14 +1,17 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from django.core.mail import send_mail
-from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
 
 from .models import Application
 from .serializers import ApplicationSerializer
 from apps.jobs.models import Job
+
+# ✅ SendGrid API
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 # ============================================
@@ -29,7 +32,6 @@ class ApplyJobView(generics.CreateAPIView):
         except Job.DoesNotExist:
             return Response({"error": "Job does not exist"}, status=400)
 
-        # 🔥 PASS REQUEST CONTEXT (IMPORTANT FOR resume_url)
         serializer = self.get_serializer(
             data=request.data,
             context={"request": request}
@@ -57,7 +59,6 @@ class CompanyApplicationsView(generics.ListAPIView):
             job__company__created_by=self.request.user
         ).order_by("-applied_at")
 
-    # 🔥 VERY IMPORTANT FOR resume_url
     def get_serializer_context(self):
         return {"request": self.request}
 
@@ -81,21 +82,22 @@ class UpdateApplicationStatusView(generics.UpdateAPIView):
         if status_value not in ["Accepted", "Rejected"]:
             raise ValidationError({"status": "Invalid status"})
 
+        # ✅ Update Status
         application.status = status_value
         application.save()
 
         # ==========================
-        # SEND EMAIL
+        # SEND EMAIL USING SENDGRID API
         # ==========================
         subject = f"Application {status_value} - {application.job.title}"
 
         if status_value == "Accepted":
-            message = f"""
+            email_body = f"""
 Dear {application.full_name},
 
 Congratulations! 🎉
 
-We are pleased to inform you that your application for the position 
+We are pleased to inform you that your application for the position
 "{application.job.title}" at {application.job.company.name} has been ACCEPTED.
 
 Our team will contact you soon with further details.
@@ -105,13 +107,14 @@ Best regards,
 Hiring Team
 """
         else:
-            message = f"""
+            email_body = f"""
 Dear {application.full_name},
 
-Thank you for applying for the position 
+Thank you for applying for the position
 "{application.job.title}" at {application.job.company.name}.
 
-After careful consideration, we regret to inform you that your application has not been selected this time.
+After careful consideration, we regret to inform you that your application
+has not been selected this time.
 
 We appreciate your interest and encourage you to apply for future opportunities.
 
@@ -121,15 +124,18 @@ Hiring Team
 """
 
         try:
-            send_mail(
-                subject=subject,
-                message=message,
+            message = Mail(
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[application.email],
-                fail_silently=False,
+                to_emails=application.email,
+                subject=subject,
+                plain_text_content=email_body,
             )
+
+            sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
+            sg.send(message)
+
         except Exception as e:
-            print("Email sending failed:", str(e))
+            print("SendGrid error:", str(e))
 
         return Response({"message": f"Application {status_value} successfully"})
 
@@ -142,7 +148,6 @@ class CompanyAnalyticsView(APIView):
 
     def get(self, request):
         jobs = Job.objects.filter(created_by=request.user)
-
         total_jobs = jobs.count()
 
         applications = Application.objects.filter(
