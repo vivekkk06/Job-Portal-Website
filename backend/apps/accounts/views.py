@@ -115,9 +115,8 @@ class StartRegisterView(APIView):
 
         return Response({"message": "OTP sent successfully"})
 
-
 # ======================================================
-# RESEND OTP
+# RESEND OTP (FIXED + SAFE VERSION)
 # ======================================================
 class ResendOTPView(APIView):
     permission_classes = [AllowAny]
@@ -126,27 +125,46 @@ class ResendOTPView(APIView):
         email = request.data.get("email")
 
         if not email:
-            return Response({"error": "Email is required"}, status=400)
+            return Response(
+                {"message": "Email is required"},
+                status=400
+            )
 
-        user = User.objects.filter(email=email, is_active=False).first()
+        # ✅ Get user even if inactive
+        user = User.objects.filter(email=email).first()
 
         if not user:
-            return Response({"error": "User not found or already active"}, status=400)
+            return Response(
+                {"message": "No account found with this email"},
+                status=404
+            )
 
-        otp = str(random.randint(100000, 999999))
+        # ❌ If already active → no need OTP
+        if user.is_active:
+            return Response(
+                {"message": "Account already verified. Please login."},
+                status=400
+            )
 
-        user.otp = otp
-        user.last_login = timezone.now()
+        # ✅ Generate new OTP
+        otp = random.randint(100000, 999999)
+        user.otp = str(otp)
         user.save()
 
+        # ✅ Send Email
         try:
-            send_otp_via_sendgrid(email, otp)
+            send_otp_via_sendgrid(user.email, otp)
         except Exception as e:
-            print("Email resend failed:", str(e))
-            return Response({"error": "Failed to resend OTP"}, status=500)
+            print("Resend OTP email error:", str(e))
+            return Response(
+                {"message": "Failed to resend OTP. Please try again."},
+                status=500
+            )
 
-        return Response({"message": "OTP resent successfully"})
-
+        return Response(
+            {"message": "OTP resent successfully 📩"},
+            status=200
+        )
 
 # ======================================================
 # VERIFY EMAIL
