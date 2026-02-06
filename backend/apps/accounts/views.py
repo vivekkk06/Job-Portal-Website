@@ -219,7 +219,7 @@ class EmailOrUsernameTokenView(TokenObtainPairView):
 
 
 # ======================================================
-# CURRENT USER (GET + PATCH SUPPORT)
+# CURRENT USER (GET + UPDATE)
 # ======================================================
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -228,14 +228,32 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
     def patch(self, request):
-        serializer = UserSerializer(
-            request.user,
-            data=request.data,
-            partial=True
+        user = request.user
+
+        username = request.data.get("username")
+        email = request.data.get("email")
+
+        if username:
+            # prevent duplicate username
+            if User.objects.exclude(id=user.id).filter(username=username).exists():
+                return Response(
+                    {"error": "Username already taken"},
+                    status=400
+                )
+            user.username = username
+
+        if email:
+            # prevent duplicate email
+            if User.objects.exclude(id=user.id).filter(email=email).exists():
+                return Response(
+                    {"error": "Email already in use"},
+                    status=400
+                )
+            user.email = email
+
+        user.save()
+
+        return Response(
+            UserSerializer(user).data,
+            status=200
         )
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-
-        return Response(serializer.errors, status=400)
