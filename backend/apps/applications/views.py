@@ -8,6 +8,7 @@ from django.conf import settings
 from .models import Application
 from .serializers import ApplicationSerializer
 from apps.jobs.models import Job
+from apps.accounts.permissions import IsCompany  # ✅ Correct import
 
 # ✅ SendGrid API
 from sendgrid import SendGridAPIClient
@@ -15,11 +16,11 @@ from sendgrid.helpers.mail import Mail
 
 
 # ============================================
-# APPLY FOR JOB
+# APPLY FOR JOB (ONLY NORMAL USERS)
 # ============================================
 class ApplyJobView(generics.CreateAPIView):
     serializer_class = ApplicationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # ✅ normal users apply
 
     def create(self, request, *args, **kwargs):
         job_id = request.data.get("job")
@@ -31,6 +32,13 @@ class ApplyJobView(generics.CreateAPIView):
             job = Job.objects.get(id=job_id)
         except Job.DoesNotExist:
             return Response({"error": "Job does not exist"}, status=400)
+
+        # ✅ DUPLICATE APPLICATION CHECK
+        if Application.objects.filter(job=job, applicant=request.user).exists():
+            return Response(
+                {"error": "You already applied to this job"},
+                status=400
+            )
 
         serializer = self.get_serializer(
             data=request.data,
@@ -48,11 +56,11 @@ class ApplyJobView(generics.CreateAPIView):
 
 
 # ============================================
-# COMPANY APPLICATION LIST
+# COMPANY APPLICATION LIST (ONLY COMPANY)
 # ============================================
 class CompanyApplicationsView(generics.ListAPIView):
     serializer_class = ApplicationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsCompany]  # ✅ only companies
 
     def get_queryset(self):
         return Application.objects.filter(
@@ -64,11 +72,11 @@ class CompanyApplicationsView(generics.ListAPIView):
 
 
 # ============================================
-# UPDATE STATUS (ACCEPT / REJECT)
+# UPDATE STATUS (ONLY COMPANY)
 # ============================================
 class UpdateApplicationStatusView(generics.UpdateAPIView):
     serializer_class = ApplicationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsCompany]  # ✅ only companies
 
     def get_queryset(self):
         return Application.objects.filter(
@@ -141,10 +149,10 @@ Hiring Team
 
 
 # ============================================
-# COMPANY ANALYTICS
+# COMPANY ANALYTICS (ONLY COMPANY)
 # ============================================
 class CompanyAnalyticsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCompany]  # ✅ only companies
 
     def get(self, request):
         jobs = Job.objects.filter(created_by=request.user)

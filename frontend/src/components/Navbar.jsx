@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import api from "../api/axios";
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate(); // ✅ added
 
   const [hasCompany, setHasCompany] = useState(false);
   const [loadingCompany, setLoadingCompany] = useState(false);
@@ -78,8 +79,11 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Username */}
-            <span className="font-medium text-gray-700">
+            {/* ✅ Clickable Username */}
+            <span
+              onClick={() => navigate("/profile")}
+              className="font-medium text-gray-700 cursor-pointer hover:text-blue-600 transition"
+            >
               {user.username}
             </span>
 

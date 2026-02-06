@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -31,36 +31,56 @@ import CompanyAnalytics from "./pages/CompanyAnalytics";
 import Checkout from "./pages/Checkout";
 import BlogDetail from "./pages/BlogDetail";
 
-
-
-
-
-
 export default function App() {
   return (
     <Routes>
+      {/* ===== PUBLIC ROUTES ===== */}
       <Route path="/" element={<Home />} />
       <Route path="/jobs" element={<Jobs />} />
       <Route path="/jobs/:id" element={<JobDetail />} />
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<StartRegister />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/profile" element={<Profile />} />
+      <Route path="/start-register" element={<StartRegister />} />
+      <Route path="/complete-register" element={<CompleteRegister />} />
+
       <Route path="/about" element={<About />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/help" element={<Help />} />
       <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:id" element={<BlogDetail />} />
       <Route path="/careers" element={<Careers />} />
       <Route path="/pricing" element={<Pricing />} />
-      <Route path="/post-job" element={<PostJob />} />
       <Route path="/companies" element={<Companies />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/applicant/dashboard" element={<ApplicantDashboard />} />
+
+      {/* ===== PROTECTED ROUTES ===== */}
+
+      {/* General Dashboard */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Profile */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Applicant Dashboard */}
       <Route
         path="/applicant/dashboard"
         element={
@@ -69,18 +89,65 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/start-register" element={<StartRegister />} />
-      <Route path="/complete-register" element={<CompleteRegister />} />
-      <Route path="/create-company" element={<CreateCompany />} />
-      <Route path="/apply/:id" element={<ApplyJob />} />
-      <Route path="/company-dashboard" element={<CompanyDashboard />} />
-      <Route path="/company-analytics" element={<CompanyAnalytics />} />
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:id" element={<BlogDetail />} />
 
+      {/* Apply Job */}
+      <Route
+        path="/apply/:id"
+        element={
+          <ProtectedRoute>
+            <ApplyJob />
+          </ProtectedRoute>
+        }
+      />
 
+      {/* Company Routes */}
+      <Route
+        path="/post-job"
+        element={
+          <ProtectedRoute>
+            <PostJob />
+          </ProtectedRoute>
+        }
+      />
 
+      <Route
+        path="/create-company"
+        element={
+          <ProtectedRoute>
+            <CreateCompany />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/company-dashboard"
+        element={
+          <ProtectedRoute>
+            <CompanyDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/company-analytics"
+        element={
+          <ProtectedRoute>
+            <CompanyAnalytics />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/checkout"
+        element={
+          <ProtectedRoute>
+            <Checkout />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ===== FALLBACK ===== */}
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }

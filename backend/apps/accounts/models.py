@@ -5,3 +5,9 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     otp = models.CharField(max_length=6, null=True, blank=True)
     is_verified = models.BooleanField(default=False)
+ROLE_CHOICES = (
+    ("user", "User"),
+    ("company", "Company"),
+)
+
+role = models.CharField(max_length=20, choices=ROLE_CHOICES)
