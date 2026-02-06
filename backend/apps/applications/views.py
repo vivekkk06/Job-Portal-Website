@@ -1,6 +1,5 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -8,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from .models import Application
 from .serializers import ApplicationSerializer
 from apps.jobs.models import Job
-from apps.accounts.permissions import IsCompany
 
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -63,10 +61,10 @@ class CompanyApplicationsView(generics.ListAPIView):
 
 
 # ============================================
-# UPDATE STATUS (SAFE VERSION)
+# UPDATE STATUS (ACCEPT / REJECT)
 # ============================================
 class UpdateApplicationStatusView(APIView):
-    permission_classes = [IsCompany]
+    permission_classes = [permissions.IsAuthenticated]
 
     def patch(self, request, pk):
 
@@ -77,8 +75,8 @@ class UpdateApplicationStatusView(APIView):
 
         if not application:
             return Response(
-                {"error": "Application not found"},
-                status=404
+                {"error": "Application not found or not allowed"},
+                status=status.HTTP_404_NOT_FOUND
             )
 
         status_value = request.data.get("status")
@@ -86,40 +84,78 @@ class UpdateApplicationStatusView(APIView):
         if status_value not in ["Accepted", "Rejected"]:
             return Response(
                 {"error": "Invalid status"},
-                status=400
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         application.status = status_value
         application.save()
 
-        # Email (safe)
+        # ======================================
+        # PROFESSIONAL EMAIL TEMPLATE
+        # ======================================
         try:
-            subject = f"Application {status_value} - {application.job.title}"
+            subject = f"{application.job.company.name} - Application Update ({status_value})"
+
+            if status_value == "Accepted":
+                email_body = f"""
+Dear {application.full_name},
+
+🎉 Congratulations!
+
+We are pleased to inform you that your application for the position:
+
+    {application.job.title}
+
+at {application.job.company.name} has been ACCEPTED.
+
+Our hiring team will reach out to you shortly with the next steps in the recruitment process.
+
+We appreciate the time and effort you put into your application and look forward to connecting with you.
+
+Warm regards,  
+{application.job.company.name}  
+Hiring Team
+"""
+            else:
+                email_body = f"""
+Dear {application.full_name},
+
+Thank you for your interest in the position:
+
+    {application.job.title}
+
+at {application.job.company.name}.
+
+After careful consideration, we regret to inform you that your application has not been selected on this occasion.
+
+Please do not be discouraged. We truly appreciate your effort and encourage you to apply for future opportunities with us.
+
+We wish you the very best in your career journey.
+
+Kind regards,  
+{application.job.company.name}  
+Hiring Team
+"""
 
             message = Mail(
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to_emails=application.email,
                 subject=subject,
-                plain_text_content=f"""
-Dear {application.full_name},
-
-Your application for "{application.job.title}"
-at {application.job.company.name} has been {status_value}.
-
-Best regards,
-{application.job.company.name}
-""",
+                plain_text_content=email_body,
             )
 
             sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
             sg.send(message)
 
         except Exception as e:
-            print("Email error:", str(e))
+            print("Email error (status updated successfully):", str(e))
 
         return Response(
-            {"message": f"Application {status_value} successfully"},
-            status=200
+            {
+                "message": f"Application {status_value} successfully",
+                "status": status_value
+            },
+            status=status.HTTP_200_OK
         )
 
 
