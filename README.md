@@ -116,8 +116,7 @@ CLOUDINARY_CLOUD_NAME= CLOUDINARY_API_KEY= CLOUDINARY_API_SECRET=
 
 Frontend (.env):
 
-VITE_API_URL=https://your-backend-url
-
+VITE_API_URL=backend-url
   ----------------------
   📈 RESUME HIGHLIGHTS
   ----------------------
