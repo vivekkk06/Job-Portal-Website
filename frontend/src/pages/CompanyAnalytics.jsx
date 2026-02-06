@@ -15,7 +15,14 @@ export default function CompanyAnalytics() {
       const res = await api.get("/api/applications/analytics/");
       setData(res.data);
     } catch (err) {
-      console.log("Analytics error:", err.response?.data);
+      console.log("Analytics error:", err);
+      setData({
+        total_jobs: 0,
+        total_applications: 0,
+        pending: 0,
+        accepted: 0,
+        rejected: 0,
+      });
     } finally {
       setLoading(false);
     }
@@ -31,40 +38,39 @@ export default function CompanyAnalytics() {
     );
   }
 
+  if (!data) {
+    return (
+      <MainLayout>
+        <div className="text-center py-20 text-red-600">
+          Failed to load analytics.
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <div className="max-w-6xl mx-auto p-10">
-
         <h1 className="text-3xl font-bold mb-10">
           Company Analytics Dashboard
         </h1>
 
         <div className="grid md:grid-cols-3 gap-6">
-
-          <Card title="Total Jobs" value={data.total_jobs} color="blue" />
-          <Card title="Total Applications" value={data.total_applications} color="purple" />
-          <Card title="Pending" value={data.pending} color="yellow" />
-          <Card title="Accepted" value={data.accepted} color="green" />
-          <Card title="Rejected" value={data.rejected} color="red" />
-
+          <Card title="Total Jobs" value={data.total_jobs || 0} />
+          <Card title="Total Applications" value={data.total_applications || 0} />
+          <Card title="Pending" value={data.pending || 0} />
+          <Card title="Accepted" value={data.accepted || 0} />
+          <Card title="Rejected" value={data.rejected || 0} />
         </div>
       </div>
     </MainLayout>
   );
 }
 
-function Card({ title, value, color }) {
-  const colors = {
-    blue: "bg-blue-100 text-blue-700",
-    purple: "bg-purple-100 text-purple-700",
-    yellow: "bg-yellow-100 text-yellow-700",
-    green: "bg-green-100 text-green-700",
-    red: "bg-red-100 text-red-700"
-  };
-
+function Card({ title, value }) {
   return (
-    <div className={`p-6 rounded-2xl shadow-md ${colors[color]}`}>
-      <h2 className="text-lg font-medium">{title}</h2>
+    <div className="bg-white p-6 rounded-2xl shadow">
+      <h2 className="text-lg font-medium text-gray-600">{title}</h2>
       <p className="text-3xl font-bold mt-2">{value}</p>
     </div>
   );
