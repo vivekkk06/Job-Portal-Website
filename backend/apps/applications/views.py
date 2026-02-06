@@ -165,3 +165,13 @@ class CompanyAnalyticsView(APIView):
             "accepted": applications.filter(status="Accepted").count(),
             "rejected": applications.filter(status="Rejected").count(),
         })
+
+
+class MyApplicationsView(generics.ListAPIView):
+    serializer_class = ApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Application.objects.filter(
+            applicant=self.request.user
+        ).order_by("-applied_at")
