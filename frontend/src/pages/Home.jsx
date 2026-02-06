@@ -16,10 +16,11 @@ export default function Home() {
   const [keyword, setKeyword] = useState("");
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [currentImage, setCurrentImage] = useState(0);
+  const [loadingJobs, setLoadingJobs] = useState(true);
 
   const navigate = useNavigate();
 
-  // 🔥 Fetch uploaded jobs
+  // 🔥 Fetch uploaded jobs (Pagination Safe)
   useEffect(() => {
     fetchJobs();
   }, []);
@@ -27,7 +28,11 @@ export default function Home() {
   async function fetchJobs() {
     try {
       const res = await api.get("/api/jobs/");
-      const jobs = res.data;
+
+      // ✅ FIX FOR PAGINATION
+      const jobs = Array.isArray(res.data)
+        ? res.data
+        : res.data.results || [];
 
       if (jobs.length <= 3) {
         setFeaturedJobs(jobs);
@@ -36,11 +41,14 @@ export default function Home() {
         setFeaturedJobs(shuffled.slice(0, 3));
       }
     } catch (err) {
-      console.log("Jobs fetch error:", err.response?.data);
+      console.log("Jobs fetch error:", err);
+      setFeaturedJobs([]);
+    } finally {
+      setLoadingJobs(false);
     }
   }
 
-  // 🔄 Auto image slider (every 5 sec)
+  // 🔄 Auto image slider
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) =>
@@ -63,7 +71,7 @@ export default function Home() {
     );
   };
 
-  // 🔍 Search handler
+  // 🔍 Search
   const handleSearch = () => {
     if (!keyword.trim()) return;
     navigate(`/jobs?search=${keyword}`);
@@ -112,21 +120,19 @@ export default function Home() {
           <img
             src={heroImages[currentImage]}
             alt="hero"
-            className="w-full rounded-3xl shadow-xl transition duration-700"
+            className="w-full rounded-3xl shadow-xl transition duration-700 object-cover h-[420px]"
           />
 
-          {/* Prev Button */}
           <button
             onClick={prevImage}
-            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow"
+            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100"
           >
             ◀
           </button>
 
-          {/* Next Button */}
           <button
             onClick={nextImage}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow"
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100"
           >
             ▶
           </button>
@@ -134,7 +140,7 @@ export default function Home() {
       </section>
 
       {/* TRUSTED COMPANIES */}
-      <section className="bg-white py-12">
+      <section className="bg-white py-12 border-t">
         <div className="max-w-6xl mx-auto text-center">
           <p className="font-semibold text-gray-500">
             Trusted by 1000+ companies
@@ -160,13 +166,22 @@ export default function Home() {
           Featured Jobs
         </h2>
 
-        {featuredJobs.length === 0 ? (
-          <p className="text-gray-500">
-            No jobs uploaded yet.
-          </p>
+        {loadingJobs ? (
+          <div className="text-center text-gray-500">
+            Loading jobs...
+          </div>
+        ) : featuredJobs.length === 0 ? (
+          <div className="bg-gray-50 p-10 rounded-2xl text-center shadow">
+            <p className="text-gray-500 text-lg">
+              🚀 No jobs uploaded yet.
+            </p>
+            <p className="text-gray-400 mt-2">
+              Be the first to post a job!
+            </p>
+          </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredJobs.map(job => (
+            {featuredJobs.map((job) => (
               <JobCard key={job.id} job={job} />
             ))}
           </div>
