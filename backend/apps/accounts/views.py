@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 import random
 import requests
 
@@ -14,8 +16,9 @@ from .serializers import UserSerializer, EmailOrUsernameTokenSerializer
 # EMAIL SENDER FUNCTION (Reusable + Safe)
 # ======================================================
 def send_otp_via_sendgrid(email, otp):
-    if not hasattr(settings, "SENDGRID_API_KEY"):
-        raise Exception("SENDGRID_API_KEY not configured in settings")
+
+    if not hasattr(settings, "SENDGRID_API_KEY") or not settings.SENDGRID_API_KEY:
+        raise Exception("SENDGRID_API_KEY not configured")
 
     url = "https://api.sendgrid.com/v3/mail/send"
 
@@ -34,10 +37,6 @@ def send_otp_via_sendgrid(email, otp):
         "from": {
             "email": settings.DEFAULT_FROM_EMAIL,
             "name": "JobDhundho Team"
-        },
-        "reply_to": {
-            "email": settings.DEFAULT_FROM_EMAIL,
-            "name": "JobDhundho Support"
         },
         "content": [
             {
@@ -59,15 +58,11 @@ JobDhundho Team
                 "type": "text/html",
                 "value": f"""
 <html>
-  <body style="font-family:Arial, sans-serif; padding:20px;">
+  <body style="font-family:Arial;padding:20px;">
     <h2>Welcome to JobDhundho 👋</h2>
     <p>Your verification code is:</p>
     <h1 style="color:#2563eb;">{otp}</h1>
-    <p>This code will expire in 10 minutes.</p>
-    <hr>
-    <p style="font-size:12px; color:gray;">
-      If you did not request this email, you can safely ignore it.
-    </p>
+    <p>This code expires in 10 minutes.</p>
   </body>
 </html>
 """
@@ -76,9 +71,6 @@ JobDhundho Team
     }
 
     response = requests.post(url, headers=headers, json=data, timeout=10)
-
-    print("SendGrid status:", response.status_code)
-    print("SendGrid response:", response.text)
 
     if response.status_code != 202:
         raise Exception(response.text)
@@ -99,7 +91,7 @@ class StartRegisterView(APIView):
         if User.objects.filter(email=email, is_active=True).exists():
             return Response({"error": "Email already registered"}, status=400)
 
-        otp = random.randint(100000, 999999)
+        otp = str(random.randint(100000, 999999))
 
         user = User.objects.filter(email=email).first()
 
@@ -112,6 +104,7 @@ class StartRegisterView(APIView):
             )
 
         user.otp = otp
+        user.last_login = timezone.now()  # using as OTP timestamp
         user.save()
 
         try:
@@ -140,8 +133,10 @@ class ResendOTPView(APIView):
         if not user:
             return Response({"error": "User not found or already active"}, status=400)
 
-        otp = random.randint(100000, 999999)
+        otp = str(random.randint(100000, 999999))
+
         user.otp = otp
+        user.last_login = timezone.now()
         user.save()
 
         try:
@@ -170,6 +165,10 @@ class VerifyEmailView(APIView):
 
         if not user:
             return Response({"error": "Invalid OTP"}, status=400)
+
+        # OTP expiry check (10 minutes)
+        if user.last_login and timezone.now() - user.last_login > timedelta(minutes=10):
+            return Response({"error": "OTP expired"}, status=400)
 
         user.otp = None
         user.is_verified = True
@@ -220,10 +219,23 @@ class EmailOrUsernameTokenView(TokenObtainPairView):
 
 
 # ======================================================
-# CURRENT USER
+# CURRENT USER (GET + PATCH SUPPORT)
 # ======================================================
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+    def patch(self, request):
+        serializer = UserSerializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=400)
