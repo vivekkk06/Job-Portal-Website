@@ -120,7 +120,7 @@ export default function Home() {
           <img
             src={heroImages[currentImage]}
             alt="hero"
-            className="w-full rounded-3xl shadow-xl transition duration-700 object-cover h-[420px]"
+            className="w-full rounded-3xl shadow-xl transition duration-700 object-cover h-105"
           />
 
           <button
