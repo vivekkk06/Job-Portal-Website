@@ -16,9 +16,16 @@ export default function Jobs() {
   async function fetchJobs() {
     try {
       const res = await api.get("/api/jobs/");
-      setJobs(res.data);
+
+      // ✅ HANDLE PAGINATION SAFELY
+      if (Array.isArray(res.data)) {
+        setJobs(res.data);
+      } else {
+        setJobs(res.data.results || []);
+      }
     } catch (err) {
       console.log("Error fetching jobs", err);
+      setJobs([]);
     } finally {
       setLoading(false);
     }
@@ -28,31 +35,47 @@ export default function Jobs() {
   const search = params.get("search");
   const company = params.get("company");
 
-  const filteredJobs = jobs.filter((job) => {
-    let ok = true;
+  const filteredJobs = Array.isArray(jobs)
+    ? jobs.filter((job) => {
+        let ok = true;
 
-    if (search) {
-      ok =
-        job.title?.toLowerCase().includes(search.toLowerCase()) ||
-        job.description?.toLowerCase().includes(search.toLowerCase());
-    }
+        if (search) {
+          ok =
+            job.title?.toLowerCase().includes(search.toLowerCase()) ||
+            job.description?.toLowerCase().includes(search.toLowerCase());
+        }
 
-    if (company) {
-      ok =
-        ok &&
-        job.company_name?.toLowerCase() === company.toLowerCase();
-    }
+        if (company) {
+          const companyName =
+            job.company_name ||
+            job.company?.name ||
+            "";
 
-    return ok;
-  });
+          ok =
+            ok &&
+            companyName.toLowerCase() ===
+              company.toLowerCase();
+        }
+
+        return ok;
+      })
+    : [];
 
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-4 gap-8">
         <aside className="bg-white p-6 rounded-2xl shadow h-fit">
           <h2 className="font-bold text-lg mb-4">Filters</h2>
-          {search && <p className="text-sm mb-2">🔍 Search: <b>{search}</b></p>}
-          {company && <p className="text-sm mb-2">🏢 Company: <b>{company}</b></p>}
+          {search && (
+            <p className="text-sm mb-2">
+              🔍 Search: <b>{search}</b>
+            </p>
+          )}
+          {company && (
+            <p className="text-sm mb-2">
+              🏢 Company: <b>{company}</b>
+            </p>
+          )}
         </aside>
 
         <section className="md:col-span-3">

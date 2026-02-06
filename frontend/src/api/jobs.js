@@ -7,4 +7,4 @@ export const getJob = (id) =>
   api.get(`/api/jobs/${id}/`);
 
 export const applyJob = (jobId) =>
-  api.post("/api/applications/", { job: jobId });
+  api.post("/api/applications/apply", { job: jobId });

@@ -19,9 +19,16 @@ export default function CompanyDashboard() {
   async function fetchApplications() {
     try {
       const res = await api.get("/api/applications/company/");
-      setApplications(res.data);
+
+      // ✅ SAFE PAGINATION HANDLING
+      if (Array.isArray(res.data)) {
+        setApplications(res.data);
+      } else {
+        setApplications(res.data.results || []);
+      }
     } catch (err) {
-      console.log("Error fetching applications:", err.response?.data);
+      console.log("Error fetching applications:", err);
+      setApplications([]);
     } finally {
       setLoading(false);
     }
@@ -59,13 +66,13 @@ export default function CompanyDashboard() {
         )
       );
     } catch (err) {
-      console.log("Status update error:", err.response?.data);
+      console.log("Status update error:", err);
     }
   }
 
   async function deleteJob(jobId) {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this job? This will also delete related applications."
+      "Are you sure you want to delete this job?"
     );
 
     if (!confirmDelete) return;
@@ -77,7 +84,7 @@ export default function CompanyDashboard() {
         prev.filter((app) => app.job !== Number(jobId))
       );
     } catch (err) {
-      console.log("Delete job error:", err.response?.data);
+      console.log("Delete job error:", err);
     }
   }
 
@@ -88,7 +95,6 @@ export default function CompanyDashboard() {
           Company Applications
         </h1>
 
-        {/* FILTER */}
         <div className="flex gap-3 mb-8">
           {["All", "Pending", "Accepted", "Rejected"].map((type) => (
             <button
@@ -105,106 +111,46 @@ export default function CompanyDashboard() {
           ))}
         </div>
 
-        {loading && (
-          <div className="text-center py-10">
-            Loading applications...
-          </div>
-        )}
+        {loading && <div>Loading...</div>}
 
-        {!loading && Object.keys(groupedJobs).length === 0 && (
-          <div className="text-center text-gray-500">
-            No applications found.
-          </div>
-        )}
-
-        {/* JOB GROUPS */}
-        {Object.entries(groupedJobs).map(([jobId, jobData]) => (
-          <div
-            key={jobId}
-            className="mb-10 bg-gray-50 rounded-2xl p-6 shadow"
-          >
-            {/* JOB HEADER */}
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-              <h2 className="text-2xl font-bold">
+        {!loading &&
+          Object.keys(groupedJobs).map(([jobId, jobData]) => (
+            <div key={jobId} className="mb-10 bg-gray-50 p-6 shadow">
+              <h2 className="text-xl font-bold mb-4">
                 {jobData.job_title}
               </h2>
 
-              <button
-                onClick={() => deleteJob(jobId)}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition"
-              >
-                Delete Job
-              </button>
-            </div>
+              {jobData.applications.map((app) => (
+                <div key={app.id} className="bg-white p-4 mb-4 shadow">
+                  <h3>{app.full_name}</h3>
+                  <p>{app.email}</p>
+                  <p>{app.phone}</p>
 
-            {/* APPLICATIONS */}
-            {jobData.applications.map((app) => (
-              <div
-                key={app.id}
-                className="bg-white rounded-xl shadow p-5 mb-4"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-semibold">
-                      {app.full_name}
-                    </h3>
-                    <p className="text-gray-600">{app.email}</p>
-                    <p className="text-gray-600">📞 {app.phone}</p>
-                  </div>
+                  {app.status === "Pending" && (
+                    <div className="mt-3 flex gap-3">
+                      <button
+                        onClick={() =>
+                          updateStatus(app.id, "Accepted")
+                        }
+                        className="bg-green-600 text-white px-3 py-1 rounded"
+                      >
+                        Accept
+                      </button>
 
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      app.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : app.status === "Accepted"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {app.status}
-                  </span>
-                </div>
-
-                {/* ✅ CORRECT RESUME LINK */}
-                <div className="mt-3">
-                  {app.resume_url ? (
-                    <a
-                      href={app.resume_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 font-medium hover:underline"
-                    >
-                      View Resume
-                    </a>
-                  ) : (
-                    <span className="text-gray-400">
-                      No Resume Available
-                    </span>
+                      <button
+                        onClick={() =>
+                          updateStatus(app.id, "Rejected")
+                        }
+                        className="bg-red-600 text-white px-3 py-1 rounded"
+                      >
+                        Reject
+                      </button>
+                    </div>
                   )}
                 </div>
-
-                {/* ACTIONS */}
-                {app.status === "Pending" && (
-                  <div className="mt-4 flex gap-4">
-                    <button
-                      onClick={() => updateStatus(app.id, "Accepted")}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
-                    >
-                      Accept
-                    </button>
-
-                    <button
-                      onClick={() => updateStatus(app.id, "Rejected")}
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
+              ))}
+            </div>
+          ))}
       </div>
     </MainLayout>
   );
