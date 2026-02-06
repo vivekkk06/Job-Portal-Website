@@ -36,6 +36,7 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "rest_framework_simplejwt",
+    "django_filters",   # ✅ (for search + filter later)
 
     # Cloudinary
     "cloudinary",
@@ -72,7 +73,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 # ==============================
-# TEMPLATES (ADMIN FIX)
+# TEMPLATES
 # ==============================
 
 TEMPLATES = [
@@ -123,6 +124,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.AllowAny",
     ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",  # ✅ scalable
+    "PAGE_SIZE": 6,
 }
 
 SIMPLE_JWT = {
@@ -145,7 +148,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 # ==============================
-# SENDGRID EMAIL
+# SENDGRID (API VERSION)
 # ==============================
 
 SENDGRID_API_KEY = config("SENDGRID_API_KEY")
@@ -155,8 +158,9 @@ DEFAULT_FROM_EMAIL = config(
     default="kenichi13112006@gmail.com"
 )
 
+
 # ==============================
-# CLOUDINARY (🔥 CORRECT WAY)
+# CLOUDINARY
 # ==============================
 
 CLOUDINARY_STORAGE = {
@@ -164,6 +168,7 @@ CLOUDINARY_STORAGE = {
     "API_KEY": config("CLOUDINARY_API_KEY"),
     "API_SECRET": config("CLOUDINARY_API_SECRET"),
 }
+
 
 # ==============================
 # STATIC FILES
@@ -173,8 +178,10 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
 # ==============================
-# STORAGES (Django 5+ Required)
+# STORAGES (Django 5+)
 # ==============================
 
 STORAGES = {
@@ -185,5 +192,3 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
-
