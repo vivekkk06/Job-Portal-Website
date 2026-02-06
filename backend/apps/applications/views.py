@@ -23,14 +23,21 @@ class ApplyJobView(generics.CreateAPIView):
         job_id = request.data.get("job")
 
         if not job_id:
-            return Response({"error": "Job ID required"}, status=400)
+            return Response(
+                {"message": "Job ID is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         job = get_object_or_404(Job, id=job_id)
 
-        if Application.objects.filter(job=job, applicant=request.user).exists():
+        # ✅ Prevent duplicate application
+        if Application.objects.filter(
+            job=job,
+            applicant=request.user
+        ).exists():
             return Response(
-                {"error": "You already applied to this job"},
-                status=400
+                {"message": "You have already applied to this job."},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         serializer = self.get_serializer(
@@ -41,7 +48,13 @@ class ApplyJobView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(applicant=request.user, job=job)
 
-        return Response(serializer.data, status=201)
+        return Response(
+            {
+                "message": "Application submitted successfully! 🎉",
+                "application": serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 
 # ============================================
@@ -75,7 +88,7 @@ class UpdateApplicationStatusView(APIView):
 
         if not application:
             return Response(
-                {"error": "Application not found or not allowed"},
+                {"message": "Application not found or access denied."},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -83,18 +96,19 @@ class UpdateApplicationStatusView(APIView):
 
         if status_value not in ["Accepted", "Rejected"]:
             return Response(
-                {"error": "Invalid status"},
+                {"message": "Invalid status value."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # ✅ Update status
         application.status = status_value
         application.save()
 
         # ======================================
-        # PROFESSIONAL EMAIL TEMPLATE
+        # PROFESSIONAL EMAIL TEMPLATE (SAFE)
         # ======================================
         try:
-            subject = f"{application.job.company.name} - Application Update ({status_value})"
+            subject = f"{application.job.company.name} - Application Update"
 
             if status_value == "Accepted":
                 email_body = f"""
@@ -102,38 +116,38 @@ Dear {application.full_name},
 
 🎉 Congratulations!
 
-We are pleased to inform you that your application for the position:
+We are pleased to inform you that your application for:
 
-    {application.job.title}
+{application.job.title}
 
 at {application.job.company.name} has been ACCEPTED.
 
-Our hiring team will reach out to you shortly with the next steps in the recruitment process.
+Our hiring team will contact you shortly with the next steps.
 
-We appreciate the time and effort you put into your application and look forward to connecting with you.
+Thank you for your interest in joining our organization.
 
-Warm regards,  
-{application.job.company.name}  
+Best regards,
+{application.job.company.name}
 Hiring Team
 """
             else:
                 email_body = f"""
 Dear {application.full_name},
 
-Thank you for your interest in the position:
+Thank you for applying for:
 
-    {application.job.title}
+{application.job.title}
 
 at {application.job.company.name}.
 
-After careful consideration, we regret to inform you that your application has not been selected on this occasion.
+After careful consideration, we regret to inform you that you have not been selected this time.
 
-Please do not be discouraged. We truly appreciate your effort and encourage you to apply for future opportunities with us.
+We truly appreciate your effort and encourage you to apply again in the future.
 
-We wish you the very best in your career journey.
+We wish you success in your career journey.
 
-Kind regards,  
-{application.job.company.name}  
+Kind regards,
+{application.job.company.name}
 Hiring Team
 """
 
@@ -144,15 +158,18 @@ Hiring Team
                 plain_text_content=email_body,
             )
 
-            sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-            sg.send(message)
+            # Only send if API key exists
+            if getattr(settings, "SENDGRID_API_KEY", None):
+                sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
+                sg.send(message)
 
         except Exception as e:
-            print("Email error (status updated successfully):", str(e))
+            # ❗ Never crash if email fails
+            print("Email sending failed but status updated:", str(e))
 
         return Response(
             {
-                "message": f"Application {status_value} successfully",
+                "message": f"Application {status_value} successfully.",
                 "status": status_value
             },
             status=status.HTTP_200_OK
