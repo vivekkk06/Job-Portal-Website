@@ -25,6 +25,27 @@ export default function JobDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // ✅ NEW: Apply Button Logic
+  const handleApplyClick = () => {
+    const token = localStorage.getItem("access");
+
+    // If user NOT logged in
+    if (!token) {
+      const confirmLogin = window.confirm(
+        "You must login first to apply for this job.\n\nDo you want to go to the login page?"
+      );
+
+      if (confirmLogin) {
+        navigate("/login");
+      }
+
+      return;
+    }
+
+    // If logged in → go to apply page
+    navigate(`/apply/${job.id}`);
+  };
+
   return (
     <MainLayout>
       {loading && (
@@ -50,9 +71,9 @@ export default function JobDetail() {
               </p>
             </div>
 
-            {/* 🔥 FIXED BUTTON */}
+            {/* ✅ UPDATED BUTTON */}
             <button
-              onClick={() => navigate(`/apply/${job.id}`)}
+              onClick={handleApplyClick}
               className="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700"
             >
               Apply Now
