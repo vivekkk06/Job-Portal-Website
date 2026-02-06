@@ -1,5 +1,6 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
+import MainLayout from "../layouts/MainLayout";
 import api from "../api/axios";
 
 export default function Profile() {
@@ -7,19 +8,30 @@ export default function Profile() {
 
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    username: user?.username || "",
-    email: user?.email || "",
+    username: "",
+    email: "",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user.username,
+        email: user.email,
+      });
+    }
+  }, [user]);
+
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg font-medium text-gray-600">
-          Not logged in
-        </p>
-      </div>
+      <MainLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <p className="text-lg font-medium text-gray-600">
+            Not logged in
+          </p>
+        </div>
+      </MainLayout>
     );
   }
 
@@ -37,7 +49,7 @@ export default function Profile() {
 
       await api.patch("/api/accounts/me/", formData);
 
-      await loadUser(); // refresh context
+      await loadUser();
 
       setEditMode(false);
       setMessage("Profile updated successfully 🎉");
@@ -50,110 +62,122 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex justify-center items-center px-4">
-      <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-lg transition hover:shadow-2xl">
+    <MainLayout>
+      <div className="max-w-4xl mx-auto py-20 px-4">
 
         {/* SUCCESS MESSAGE */}
         {message && (
-          <div className="mb-6 p-3 rounded-lg bg-green-100 text-green-700 text-center">
+          <div className="mb-8 p-4 rounded-xl bg-green-100 text-green-700 text-center shadow-sm">
             {message}
           </div>
         )}
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
-            {user.username?.charAt(0).toUpperCase()}
-          </div>
+        <div className="bg-white/70 backdrop-blur-lg border rounded-3xl shadow-2xl p-10 transition hover:shadow-3xl">
 
-          {editMode ? (
-            <>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className="mt-4 w-full border px-3 py-2 rounded-lg"
-              />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-3 w-full border px-3 py-2 rounded-lg"
-              />
-            </>
-          ) : (
-            <>
-              <h2 className="text-3xl font-bold mt-4">
-                {user.username}
-              </h2>
-              <p className="text-gray-500 text-sm">
-                {user.email}
-              </p>
-            </>
-          )}
-        </div>
+          {/* HEADER SECTION */}
+          <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
 
-        {/* Profile Details */}
-        {!editMode && (
-          <div className="space-y-4 text-gray-700 text-lg">
-
-            <div className="flex justify-between border-b pb-2">
-              <span className="font-medium">User ID</span>
-              <span>{user.id}</span>
+            <div className="w-24 h-24 rounded-full bg-linear-to-r from-blue-600 to-purple-600 text-white flex items-center justify-center text-3xl font-bold shadow-lg">
+              {user.username?.charAt(0).toUpperCase()}
             </div>
 
-            {user.role && (
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">Role</span>
-                <span className="capitalize">{user.role}</span>
-              </div>
-            )}
+            <div className="flex-1">
 
-            {user.date_joined && (
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-medium">Joined</span>
-                <span>
-                  {new Date(user.date_joined).toLocaleDateString()}
-                </span>
-              </div>
-            )}
+              {editMode ? (
+                <>
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className="w-full border px-4 py-3 rounded-xl mb-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
 
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full border px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </>
+              ) : (
+                <>
+                  <h2 className="text-3xl font-bold">
+                    {user.username}
+                  </h2>
+                  <p className="text-gray-500">
+                    {user.email}
+                  </p>
+                </>
+              )}
+            </div>
           </div>
-        )}
 
-        {/* BUTTONS */}
-        <div className="mt-8 text-center flex justify-center gap-4">
+          {/* PROFILE DETAILS */}
+          {!editMode && (
+            <div className="grid md:grid-cols-2 gap-6 text-gray-700">
 
-          {editMode ? (
-            <>
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition disabled:opacity-50"
-              >
-                {loading ? "Saving..." : "Save"}
-              </button>
+              <InfoCard label="User ID" value={user.id} />
 
-              <button
-                onClick={() => setEditMode(false)}
-                className="bg-gray-200 hover:bg-gray-300 px-6 py-2 rounded-xl"
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setEditMode(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition"
-            >
-              Edit Profile
-            </button>
+              {user.role && (
+                <InfoCard
+                  label="Role"
+                  value={user.role}
+                />
+              )}
+
+              {user.date_joined && (
+                <InfoCard
+                  label="Joined"
+                  value={new Date(user.date_joined).toLocaleDateString()}
+                />
+              )}
+            </div>
           )}
+
+          {/* BUTTONS */}
+          <div className="mt-10 flex gap-4 justify-center">
+
+            {editMode ? (
+              <>
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-medium transition disabled:opacity-50"
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </button>
+
+                <button
+                  onClick={() => setEditMode(false)}
+                  className="bg-gray-200 hover:bg-gray-300 px-8 py-3 rounded-xl transition"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setEditMode(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-medium transition"
+              >
+                Edit Profile
+              </button>
+            )}
+          </div>
 
         </div>
       </div>
+    </MainLayout>
+  );
+}
+
+/* Small reusable card */
+function InfoCard({ label, value }) {
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm border">
+      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-lg font-semibold mt-1">{value}</p>
     </div>
   );
 }
