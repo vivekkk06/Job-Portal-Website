@@ -3,9 +3,9 @@ from .views import (
     ApplyJobView,
     CompanyApplicationsView,
     UpdateApplicationStatusView,
+    CompanyAnalyticsView,
     MyApplicationsView
 )
-from .views import CompanyAnalyticsView
 
 urlpatterns = [
     path("apply/", ApplyJobView.as_view(), name="apply-job"),

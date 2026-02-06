@@ -10,8 +10,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = "__all__"
-
-        # 🔥 VERY IMPORTANT
         read_only_fields = [
             "applicant",
             "job",
