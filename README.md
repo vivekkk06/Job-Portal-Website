@@ -2,7 +2,7 @@
 JOBDHUNDHO – FULL STACK JOB PORTAL PLATFORM
 ============================================================
 
-Live Application: https://jobdhundho-u9il.onrender.com
+Live Application:https://job-portal-website-vzmm.onrender.com
 
   --------------------
   📌 PROJECT SUMMARY
