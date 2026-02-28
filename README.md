@@ -1,144 +1,223 @@
-============================================================ 🚀
-JOBDHUNDHO – FULL STACK JOB PORTAL PLATFORM
-============================================================
+# 🚀 JOBDHUNDHO — Full Stack Job Portal Platform
 
-Live Application:https://job-portal-website-vzmm.onrender.com
+🌐 **Live Application:**
+https://job-portal-website-vzmm.onrender.com
 
-  --------------------
-  📌 PROJECT SUMMARY
-  --------------------
+---
 
-JobDhundho is a production-ready full-stack job portal web application
-designed to connect job seekers and companies through a secure,
-scalable, and modern web platform.
+# 📌 Overview
 
-The system supports role-based authentication, job posting, job
-applications, resume uploads, email notifications, analytics dashboards,
-and secure JWT-based authentication.
+**JobDhundho** is a production-ready full-stack job portal platform designed to connect job seekers and companies through a secure, scalable, and modern web application.
 
-This project demonstrates real-world backend architecture, API design,
-frontend engineering, authentication flows, cloud integration, and
-deployment.
+The system supports role-based authentication, job posting and management, resume uploads, application tracking, analytics dashboards, and automated email notifications.
 
-  --------------------
-  🛠 TECHNOLOGY STACK
-  --------------------
+This project demonstrates real-world backend architecture, REST API design, frontend engineering, authentication workflows, cloud integration, and full-stack deployment.
 
-Frontend: • React (Vite) • React Router • Axios • Tailwind CSS • Context
-API (Global Auth State) • JWT Authentication Handling
+---
 
-Backend: • Django • Django REST Framework • Simple JWT • PostgreSQL
-(Production Database) • Cloudinary (Resume Storage) • SendGrid (Email
-Service) • Django Filters • WhiteNoise (Static Files)
+# 🛠 Tech Stack
 
-Deployment: • Render (Backend + Frontend) • GitHub Version Control
+## Frontend
 
-  ------------------
-  ✨ CORE FEATURES
-  ------------------
+* React (Vite)
+* React Router
+* Axios
+* Tailwind CSS
+* Context API (Global Authentication State)
+* JWT Token Handling
 
-🔐 Authentication System • Email OTP verification using SendGrid •
-JWT-based login (email or username) • Secure token handling with refresh
-tokens • Role-based users (Applicant / Company) • Profile editing
-functionality
+## Backend
 
-👨‍💼 Company Features • Create company profile • Post new jobs • Delete
-jobs • View applications grouped by job • Accept / Reject applications •
-Automatic email notification on status update • Company analytics
-dashboard
+* Django
+* Django REST Framework
+* Simple JWT (Authentication)
+* PostgreSQL (Production Database)
+* Django Filters
+* WhiteNoise (Static Files)
 
-👨‍🎓 Applicant Features • Browse available jobs • Search and filter jobs •
-Apply with resume upload (Cloudinary) • Track application status •
-Personal applicant dashboard
+## Cloud & Integrations
 
-📊 Analytics • Total jobs • Total applications • Pending / Accepted /
-Rejected statistics
+* Cloudinary (Resume Storage)
+* SendGrid (Email Service)
 
-📧 Email Integration • OTP email verification • Application accepted
-email • Application rejected email • HTML + Plain text email support •
-Secure API-based SendGrid integration
+## Deployment
 
-📂 Cloud File Handling • Resume upload to Cloudinary • Secure file URL
-generation • Production-ready media storage
+* Render (Frontend + Backend)
+* GitHub (Version Control)
 
-  -----------------------
-  🏗 SYSTEM ARCHITECTURE
-  -----------------------
+---
 
-React Frontend ↓ Django REST API ↓ PostgreSQL Database ↓ Cloudinary
-(File Storage) ↓ SendGrid (Email Service)
+# ✨ Key Features
 
-  ----------------------
-  📁 PROJECT STRUCTURE
-  ----------------------
+## 🔐 Authentication & Security
 
-backend/ apps/ accounts/ companies/ jobs/ applications/ config/
-settings.py urls.py
+* Email OTP verification via SendGrid
+* JWT-based authentication with refresh tokens
+* Login using email or username
+* Role-based access control (Applicant / Company)
+* Secure profile management
 
-frontend/ src/ pages/ components/ layouts/ context/ api/
+## 👨‍💼 Company Features
 
-  ----------------------------
-  🔑 IMPORTANT API ENDPOINTS
-  ----------------------------
+* Create and manage company profiles
+* Post and delete job listings
+* View applications grouped by job
+* Accept or reject applications
+* Automated email notifications on status updates
+* Company analytics dashboard
 
-Authentication: POST /api/accounts/start-register/ POST
-/api/accounts/verify-email/ POST /api/accounts/login/ GET
-/api/accounts/me/ PATCH /api/accounts/me/
+## 👨‍🎓 Applicant Features
 
-Jobs: GET /api/jobs/ POST /api/jobs/ GET /api/jobs/{id}/ DELETE
-/api/jobs/{id}/delete/
+* Browse, search, and filter jobs
+* Apply with resume upload (Cloudinary integration)
+* Track application status
+* Personalized applicant dashboard
 
-Applications: POST /api/applications/apply/ GET
-/api/applications/company/ PATCH /api/applications/{id}/update/ GET
-/api/applications/analytics/ GET /api/applications/my/
+## 📊 Analytics
 
-  -----------------------
-  🚀 HOW TO RUN LOCALLY
-  -----------------------
+* Total jobs posted
+* Total applications received
+* Application status statistics (Pending / Accepted / Rejected)
 
-Backend:
+## 📧 Email Integration
 
-cd backend python -m venv venv venv(Windows) pip install -r
-requirements.txt python manage.py migrate python manage.py runserver
+* OTP verification emails
+* Application acceptance/rejection emails
+* HTML and plain-text email support
+* Secure SendGrid API integration
 
-Frontend:
+## 📂 Cloud File Management
 
-cd frontend npm install npm run dev
+* Resume upload to Cloudinary
+* Secure file storage with CDN delivery
+* Production-ready media handling
 
-  --------------------------
-  🔐 ENVIRONMENT VARIABLES
-  --------------------------
+---
 
-Backend (.env):
+# 🏗 System Architecture
 
-SECRET_KEY= DEBUG= DATABASE_URL= SENDGRID_API_KEY= DEFAULT_FROM_EMAIL=
-CLOUDINARY_CLOUD_NAME= CLOUDINARY_API_KEY= CLOUDINARY_API_SECRET=
+React Frontend
+↓
+Django REST API
+↓
+PostgreSQL Database
+↓
+Cloudinary (File Storage)
+↓
+SendGrid (Email Service)
 
-Frontend (.env):
+---
 
+# 📁 Project Structure
+
+```
+backend/
+    apps/
+        accounts/
+        companies/
+        jobs/
+        applications/
+    config/
+    settings.py
+    urls.py
+
+frontend/
+    src/
+        pages/
+        components/
+        layouts/
+        context/
+        api/
+```
+
+---
+
+# 🔑 Important API Endpoints
+
+## Authentication
+
+* POST `/api/accounts/start-register/`
+* POST `/api/accounts/verify-email/`
+* POST `/api/accounts/login/`
+* GET `/api/accounts/me/`
+* PATCH `/api/accounts/me/`
+
+## Jobs
+
+* GET `/api/jobs/`
+* POST `/api/jobs/`
+* GET `/api/jobs/{id}/`
+* DELETE `/api/jobs/{id}/delete/`
+
+## Applications
+
+* POST `/api/applications/apply/`
+* GET `/api/applications/company/`
+* PATCH `/api/applications/{id}/update/`
+* GET `/api/applications/analytics/`
+* GET `/api/applications/my/`
+
+---
+
+# 🚀 Local Development Setup
+
+## Backend
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+## Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+# 🔐 Environment Variables
+
+## Backend (.env)
+
+```
+SECRET_KEY=
+DEBUG=
+DATABASE_URL=
+SENDGRID_API_KEY=
+DEFAULT_FROM_EMAIL=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+## Frontend (.env)
+
+```
 VITE_API_URL=backend-url
-  ----------------------
-  📈 RESUME HIGHLIGHTS
-  ----------------------
+```
 
-• Built scalable REST APIs using Django REST Framework • Implemented JWT
-authentication with email OTP verification • Integrated third-party APIs
-(SendGrid, Cloudinary) • Designed responsive UI using React + Tailwind
-CSS • Implemented analytics dashboard and real-time status updates •
-Deployed full-stack application to production • Designed secure file
-upload and cloud-based media storage • Implemented pagination,
-filtering, and search functionality
+---
 
-  ------------------------
-  🎯 FUTURE IMPROVEMENTS
-  ------------------------
+# 🎯 Future Improvements
 
-• Real-time notifications • Admin moderation panel • Saved jobs feature
-• Company subscription system • Advanced filtering & sorting • Resume
-parsing and AI-based job matching
+* Real-time notifications (WebSockets)
+* Admin moderation panel
+* Saved jobs feature
+* Company subscription plans
+* Advanced search and sorting
+* AI-based resume parsing and job matching
 
-  -----------
-  👨‍💻 AUTHOR
-  -----------
+---
 
-Vivek Badgujar 
+# 👨‍💻 Author
+
+**Vivek Badgujar**
+
+---
